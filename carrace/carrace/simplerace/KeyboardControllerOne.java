@@ -14,10 +14,10 @@ public class KeyboardControllerOne extends KeyAdapter implements Controller, Con
         int action = drivingAction * 3 + steeringAction;
 
 // (1)
-//		System.out.println("getSpeed(): " + inputs.getSpeed());
+		// System.out.println("getSpeed(): " + inputs.getSpeed());
 
 // (2a)
-//		System.out.println("getAngleToNextWaypoint(): " + inputs.getAngleToNextWaypoint());
+		// System.out.println("getAngleToNextWaypoint(): " + inputs.getAngleToNextWaypoint());
 
 // (2b)
 // 		System.out.println("getAngleToNextNextWaypoint(): " + inputs.getAngleToNextNextWaypoint());

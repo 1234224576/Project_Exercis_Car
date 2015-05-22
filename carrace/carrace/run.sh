@@ -1,3 +1,9 @@
 #!/bin/sh
-javac simplerace/MyController
-java simplerace.Play simplerace.MyController
+if [ "$1" -eq 2 ]; then
+	javac simplerace/MyController.java
+	javac simplerace/MyController2.java
+	java simplerace.Play simplerace.MyController simplerace.MyController2
+else
+	javac simplerace/MyController.java
+	java simplerace.Play simplerace.MyController 
+fi
