@@ -81,12 +81,16 @@ public class MyController implements Controller, Constants {
 	}
 
 	/***
-		ブレーキをかけるタイミングを返す
+		次の旗を取得するときスピードを返す。
+		更に、減速するタイミングを計算して返す。
 	***/
-	private double calcReduceSpeedDistance(){
+	private double calcSpeedWhenGetNextFlag(){
 		double distance = 10.0;
-		
+
 		return distance;
+	}
+	private double calcReduceSpeedDistance(){
+
 	}
 
 
