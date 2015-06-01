@@ -45,11 +45,19 @@ dataFile = open('sample.txt','r')
 lines = dataFile.readlines()
 count = 0
 x_params = []
+y_params = []
 for line in lines:
-	x_params.append(float(line))
+	x,y = line.split("\t")
+	x_params.append(float(x))
+	a = (float(y) - 200.0)
+	b = pow(3200.0,0.5)
+	c = a/b
+	print a
+	y_params.append(c)
+
 	count += 1
 
-y_params = range(0,count)
+# y_params = range(0,count)
 
 
 
@@ -63,7 +71,7 @@ print error(f1,x_params,y_params)
 #Plot graph
 # fx = sp.linspace(0,5,100)
 # plt.plot(fx,f1(fx),linewidth=4)
-plt.plot(y_params,x_params,'o')
+plt.plot(y_params,x_params,linewidth=2)
 plt.autoscale(tight=True)
 plt.grid()
 plt.show()
