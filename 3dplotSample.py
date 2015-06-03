@@ -41,25 +41,30 @@ import matplotlib.pyplot as plt
 def error(f,x,y):
 	return sp.sum((f(x)-y)**2)
 
-dataFile = open('sample.txt','r')
+dataFile = open('foward_curve.txt','r')
 lines = dataFile.readlines()
 count = 0
 x_params = []
 y_params = []
 for line in lines:
-	x,y = line.split("\t")
+	x,y = line.split(" ")
 	x_params.append(float(x))
-	a = (float(y) - 200.0)
-	b = pow(3200.0,0.5)
-	c = a/b
-	print a
-	y_params.append(c)
-
-	count += 1
+	a = float(y)
+	y_params.append(a)
 
 # y_params = range(0,count)
 
 
+dataFile = open('back_curve.txt','r')
+lines = dataFile.readlines()
+count = 0
+x_params2 = []
+y_params2 = []
+for line in lines:
+	x,y = line.split(" ")
+	x_params2.append(float(x))
+	a = float(y)
+	y_params2.append(a)
 
 fp1 = sp.polyfit(x_params,y_params,100)
 f1 = sp.poly1d(fp1)
@@ -72,6 +77,8 @@ print error(f1,x_params,y_params)
 # fx = sp.linspace(0,5,100)
 # plt.plot(fx,f1(fx),linewidth=4)
 plt.plot(y_params,x_params,linewidth=2)
+plt.plot(y_params2,x_params2,linewidth=2)
+
 plt.autoscale(tight=True)
 plt.grid()
 plt.show()

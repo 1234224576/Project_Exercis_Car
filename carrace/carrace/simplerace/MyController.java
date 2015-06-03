@@ -2,19 +2,21 @@ package simplerace;
 
 public class MyController implements Controller, Constants {
 
-	public static final double THRESHOLD_REDUCE_SPEED_DISTANCE = 0.12;
-	public static final double MAX_SPEED = 7.5;
+	public static final int CHANGE_COUNT = 5;
 
 	private SensorModel inputs;
 
-	private boolean backMode = false;
+	private boolean backMode = true;//デフォルトはバック走行
+
 	private double reduceSpeedDistance = 0;
+	private boolean isMiss = false;
 
     public void reset() {}
 
     public int control (SensorModel inputs) {
     	this.inputs = inputs;
 		int command = forward;
+
 		
 		command = defaultThink();
 		
@@ -33,19 +35,20 @@ public class MyController implements Controller, Constants {
 		if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
 			if(reduceSpeedDistance >= inputs.getDistanceToNextWaypoint()){
 				//ブレーキを踏む
+				System.out.println(inputs.getDistanceToNextWaypoint());
+
+				System.out.println("ブレーキ");
 				command = (backMode) ? forward : backward;
 			}
 		}
 
 		//バックモード/フロントモードへの切り替えの決定
-		backMode = decisionBackMode();
+		// backMode = decisionBackMode();
 
 
 		//旗取り逃し処理。バックする
-		// if(inputs.getDistanceToNextWaypoint() < 0.1 && Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 7.0){
-		// 	backMode = true;
-		// 	command = backward;
-		// }
+		int c = missCatchFlag();
+		if(c != -1) command = c;
 
         return command;
     }
@@ -70,26 +73,48 @@ public class MyController implements Controller, Constants {
 	***/
 	private boolean decisionBackMode(){
 		boolean result = this.backMode;
+		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離	
+		double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
 
-		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
-			
-		if(inputs.getSpeed() > 1.5) return result;
-		if(distance > 0.5) return result;
+		// System.out.println(Math.abs(inputs.getSpeed()));
 
-		double angle = radian2Degree(inputs.getAngleToNextWaypoint());
-		
+		if(Math.abs(inputs.getSpeed()) > 3.0) return result;
+		// if(distance > 0.5) return result;
+		if(angle >= 100 && angle <= 170.0 && !backMode){
+			return true;
+		}
 
-		if((!(angle >170) && !(angle < -170)) || !(angle < 5 && angle > -5)){
-			// if(angle < -5.0){
-			// 	result = true;
-			// }else{
-			// 	result = false;
-			// }
-			System.out.println("ここがよばれた");
-			result = !result;
+		if(angle <= 50.0 && backMode){
+			return false;
 		}
 	
 		return result;
+	}
+	/***
+		旗を取り逃した時の処理
+	***/
+	private int missCatchFlag(){
+		// System.out.println("距離:"+inputs.getDistanceToNextWaypoint());
+		// System.out.println("角度:"+Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())));
+
+
+		if(inputs.getDistanceToNextWaypoint() < 0.05){
+			double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
+			if(angle >=7.0 && angle <= 173.0){
+				isMiss = true;
+			}
+		}
+
+		if(isMiss && inputs.getDistanceToNextWaypoint() < 0.08){
+			// return (backMode) ? forward : backward;	
+			return goFowardNextFlagReverseDirection();
+		}else{
+			isMiss = false;
+		}
+
+
+
+		return -1;
 	}
 
 	/***
@@ -98,7 +123,6 @@ public class MyController implements Controller, Constants {
 	private double calcAllowFowardAngle(){
 		double angle = 0;
 		double distance = this.inputs.getDistanceToNextWaypoint();
-		// System.out.println("Distance:"+distance);
 		if(distance < 0.2){
 			angle = 5.0;
 		}else if(distance < 0.5){
@@ -115,7 +139,7 @@ public class MyController implements Controller, Constants {
 		次の旗を取得時の突入スピードを返す
 	***/
 	private double calcSpeedWhenGetNextFlag(){
-		double idealSpeed = 5.0; //理想突入スピード
+		double idealSpeed = 4.0; //理想突入スピード
 
 		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
 		double angle = getTwoPointDegree(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次の次の旗との角度
@@ -132,10 +156,7 @@ public class MyController implements Controller, Constants {
 		double cx = Math.pow(2.7,2.2 * (Math.log(currentSpeed) - Math.log(6.06)));
 		double tx = Math.pow(2.7,2.2 * (Math.log(targetSpeed) - Math.log(6.06)));
 
-		// System.out.println("0.4希望" + cx);
-		// System.out.println("今のスピード"+currentSpeed);
 		double result = cx - tx;
-		// System.out.println("距離" + result);
 		return result;
 	}
 
@@ -148,6 +169,13 @@ public class MyController implements Controller, Constants {
 			return  (backMode) ? backwardleft :forwardleft;
 		}
 		return (backMode) ? backwardright :forwardright;
+    }
+
+    private int goFowardNextFlagReverseDirection(){
+    	if(this.inputs.getAngleToNextWaypoint() >= 0) {
+			return  (backMode) ? backwardright :forwardright;
+		}
+		return (backMode) ? backwardleft :forwardleft;
     }
 
     private int goFowardNextNextFlagDirection(){
