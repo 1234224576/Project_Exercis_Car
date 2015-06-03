@@ -8,13 +8,7 @@ public class MyController implements Controller, Constants {
 	private SensorModel inputs;
 
 	private boolean backMode = false;
-
 	private double reduceSpeedDistance = 0;
-	//
-	// private boolean isOk = true;
-	// private boolean start = false;
-	// private double currentDis = 0;
-	//
 
     public void reset() {}
 
@@ -23,14 +17,11 @@ public class MyController implements Controller, Constants {
 		int command = forward;
 		
 		command = defaultThink();
-		System.out.println("今のスピード" + inputs.getSpeed());
-
 		
+		//理想スピードを計算
 		double idealSpeed = calcSpeedWhenGetNextFlag();
-
-		
+		//減速開始位置を算出
 		reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
-		System.out.println("reduceDistance;"+ reduceSpeedDistance);
 
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			//リセット
@@ -38,15 +29,10 @@ public class MyController implements Controller, Constants {
 		}
 
 
-		//|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0
+		//減速開始判定処理
 		if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
-			 // if(backMode) therdhold = 2.0;
-			// System.out.println("減速すべき距離" + reduceSpeedDistance);
-			// System.out.println("今の距離" + inputs.getDistanceToNextWaypoint());
-
 			if(reduceSpeedDistance >= inputs.getDistanceToNextWaypoint()){
 				//ブレーキを踏む
-				// System.out.println("ブレーキバック");
 				command = (backMode) ? forward : backward;
 			}
 		}
@@ -55,57 +41,11 @@ public class MyController implements Controller, Constants {
 		backMode = decisionBackMode();
 
 
-		// //バックする
-		if(inputs.getDistanceToNextWaypoint() < 0.1 && Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 7.0){
-			backMode = true;
-			command = backward;
-		}
-
-		
-		/**ログ記録部分**/
-		// double next = 0;
-		// if(inputs.getSpeed() >= 10.0) start = true;
-
-		// if(start){
-		// 	command = backward; //ブレーキ
-		// 	if(isOk){
-		// 		System.out.println(inputs.getSpeed());
-		// 		currentDis = inputs.getDistanceToNextWaypoint();
-		// 		next = currentDis + 0.01;
-		// 		isOk = false;
-		// 	}else{
-		// 		double current = inputs.getDistanceToNextWaypoint();
-		// 		if(next <= current){
-		// 			isOk = true;
-		// 		}
-		// 	}
-		// }
-		
-
-		/**ここまで**/
-
-		/**仮実装部分**/
-
-		// if(inputs.getDistanceToNextWaypoint() < THRESHOLD_REDUCE_SPEED_DISTANCE){
-		// 	//スピードが1.0以下になるまで減速
-		// 	if(inputs.getSpeed() > 1.0){
-		// 		command = backward;
-		// 	}else{
-		// 		//減速済みなら次もしくは更に次の旗の方向へハンドルをきる
-		// 		if(inputs.getDistanceToNextWaypoint() < 0.15){
-		// 			command = goFowardNextFlagDirection();
-		// 		}else{
-		// 			command = goFowardNextNextFlagDirection();
-		// 		}
-		// 	}
-		// }
-
-		// if(inputs.getSpeed() > MAX_SPEED){
+		//旗取り逃し処理。バックする
+		// if(inputs.getDistanceToNextWaypoint() < 0.1 && Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 7.0){
+		// 	backMode = true;
 		// 	command = backward;
 		// }
-		// System.out.println(radian2Degree(inputs.getAngleToNextWaypoint()));
-
-		/*ここまで*/
 
         return command;
     }
