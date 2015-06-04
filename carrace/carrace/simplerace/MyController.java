@@ -35,9 +35,9 @@ public class MyController implements Controller, Constants {
 		if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
 			if(reduceSpeedDistance >= inputs.getDistanceToNextWaypoint()){
 				//ブレーキを踏む
-				System.out.println(inputs.getDistanceToNextWaypoint());
+				// System.out.println(inputs.getDistanceToNextWaypoint());
 
-				System.out.println("ブレーキ");
+				// System.out.println("ブレーキ");
 				command = (backMode) ? forward : backward;
 			}
 		}
@@ -139,12 +139,35 @@ public class MyController implements Controller, Constants {
 		次の旗を取得時の突入スピードを返す
 	***/
 	private double calcSpeedWhenGetNextFlag(){
-		double idealSpeed = 4.0; //理想突入スピード
+		double idealSpeed; //理想突入スピード
 
 		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
-		double angle = getTwoPointDegree(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次の次の旗との角度
+		double angle = getTwoPointDegreeTwo(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()) - getCarDegree(); //次の旗と次の次の旗との角度
+
+		double angle2 = Math.abs(angle);
+		if(angle2 > 180){
+			angle2 = 360 - angle2;
+		}
 
 		//それっぽい計算をする
+		double score = angle2/30 + distance/120;
+
+		if(score <= 3){
+			idealSpeed = 5.0;
+		}else if(score <= 6){
+			idealSpeed = 6.0;
+		}else if(score <= 9){
+			idealSpeed = 8.0;
+		}else if(score <= 12){
+			idealSpeed = 10.0;
+		}else if(score <= 15){
+			idealSpeed = 12.0;
+		}else{
+			idealSpeed = 15.0;
+		}
+
+		// System.out.println("距離:"+distance);
+		// System.out.println("角度:"+angle2);
 
 		return idealSpeed;
 	}
@@ -201,6 +224,18 @@ public class MyController implements Controller, Constants {
 
 	private double radian2Degree(double rad){
 		double degree = rad * 180d / Math.PI;
+	    return degree;
+	}
+
+	private double getCarDegree() {
+	    double radian = inputs.getOrientation();
+	    double degree = radian2Degree(radian);
+	    return degree;
+	}
+
+	private double getTwoPointDegreeTwo(Vector2d v1,Vector2d v2) {
+	    double radian = Math.atan2(v2.y - v1.y, v2.x - v1.x);
+	    double degree = radian2Degree(radian);
 	    return degree;
 	}
 
