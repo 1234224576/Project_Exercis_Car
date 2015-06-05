@@ -4,6 +4,7 @@
 # import matplotlib.pyplot as plt
 # import numpy as np
 
+
 # dataFile = open('sample.txt','r')
 # lines = dataFile.readlines()
 
@@ -37,47 +38,74 @@
 
 import scipy as sp
 import matplotlib.pyplot as plt
+from math import *
 
 def error(f,x,y):
 	return sp.sum((f(x)-y)**2)
 
-dataFile = open('foward_curve.txt','r')
+###backMode####
+# dataFile = open('back.txt','r')
+# lines = dataFile.readlines()
+# count = 0
+# x_params = []
+# y_params = []
+# for line in lines:
+# 	x,y = line.split(" ")
+# 	x_params.append(-1* (float(x)- 200.0)/ pow(3600,0.5))
+# 	y_params.append(-1 * float(y))
+###############
+
+###frontMode####
+# dataFile = open('front.txt','r')
+# lines = dataFile.readlines()
+# count = 0
+# x_params = []
+# y_params = []
+# for line in lines:
+# 	x,y = line.split(" ")
+# 	x_params.append((float(x)- 200.0) / pow(3600,0.5))
+# 	y_params.append(float(y))
+###############
+
+# #########テスト#########
+dataFile = open('test.txt','r')
 lines = dataFile.readlines()
 count = 0
 x_params = []
 y_params = []
 for line in lines:
-	x,y = line.split(" ")
+	x,y = line.split("\t")
 	x_params.append(float(x))
-	a = float(y)
-	y_params.append(a)
+	y_params.append(float(y))
+#########
+
 
 # y_params = range(0,count)
 
 
-dataFile = open('back_curve.txt','r')
-lines = dataFile.readlines()
-count = 0
-x_params2 = []
-y_params2 = []
-for line in lines:
-	x,y = line.split(" ")
-	x_params2.append(float(x))
-	a = float(y)
-	y_params2.append(a)
+# dataFile = open('back_curve.txt','r')
+# lines = dataFile.readlines()
+# count = 0
+# x_params2 = []
+# y_params2 = []
+# for line in lines:
+# 	x,y = line.split(" ")
+# 	x_params2.append(float(x))
+# 	a = float(y)
+# 	y_params2.append(a)
 
-fp1 = sp.polyfit(x_params,y_params,100)
-f1 = sp.poly1d(fp1)
+# fp1 = sp.polyfit(x_params,y_params,100)
+# f1 = sp.poly1d(fp1)
 
-print error(f1,x_params,y_params)
+# print error(f1,x_params,y_params)
 
 
 
 #Plot graph
 # fx = sp.linspace(0,5,100)
 # plt.plot(fx,f1(fx),linewidth=4)
-plt.plot(y_params,x_params,linewidth=2)
-plt.plot(y_params2,x_params2,linewidth=2)
+plt.plot(x_params,y_params,linewidth=2)
+# plt.plot(y_params2,x_params2,linewidth=2)
 
 plt.autoscale(tight=True)
 plt.grid()

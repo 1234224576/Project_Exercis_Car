@@ -1,21 +1,21 @@
 package simplerace;
 
-public class MyController implements Controller, Constants {
+public class DController implements Controller, Constants {
 
 	public static final int CHANGE_COUNT = 5;
 
 	private SensorModel inputs;
 
-	private boolean backMode = false;//デフォルトはバック走行
+	private boolean backMode = true;//デフォルトはバック走行
 
 	private double reduceSpeedDistance = 0;
 	private boolean isMiss = false;
+
     public void reset() {}
 
     public int control (SensorModel inputs) {
     	this.inputs = inputs;
-		int command = backward;
-		// System.out.println(inputs.getPosition().x + " " + inputs.getSpeed());
+		int command = forward;
 
 		
 		command = defaultThink();
@@ -25,7 +25,6 @@ public class MyController implements Controller, Constants {
 		//減速開始位置を算出
 		reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
 
-		
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			//リセット
 			reduceSpeedDistance = 0;
@@ -49,9 +48,9 @@ public class MyController implements Controller, Constants {
 		if(c != -1) command = c;
 
 		//旗を取る直前に次の旗へ向かってハンドルを切る
-		// if(inputs.getDistanceToNextWaypoint() <= 0.08){
-		// 	command = goFowardNextNextFlagDirection();
-		// }
+		if(inputs.getDistanceToNextWaypoint() <= 0.08){
+			command = goFowardNextNextFlagDirection();
+		}
 
         return command;
     }
@@ -171,7 +170,7 @@ public class MyController implements Controller, Constants {
 
 		// System.out.println("距離:"+distance);
 		// System.out.println("角度:"+angle2);
-		idealSpeed = 0;
+
 		return idealSpeed;
 	}
 	/***
@@ -179,22 +178,10 @@ public class MyController implements Controller, Constants {
 	***/
 	private double calcReduceSpeedDistance(double currentSpeed,double targetSpeed){
 
-		double cx = 0;
-		double tx = 0;
-		if(!backMode){
-			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
-			tx = Math.pow(2.7, 2.2*(Math.log(targetSpeed) - Math.log(6.06)));
-		}else{
-			//計測しなおさないといけない
-			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
-			tx = Math.pow(2.7, 2.2*(Math.log(targetSpeed) - Math.log(6.06)));
-		}
-		// cx /= Math.pow(3600,0.5);
-		// tx /= Math.pow(3600,0.5);
+		double cx = Math.pow(2.7,2.2 * (Math.log(currentSpeed) - Math.log(6.06)));
+		double tx = Math.pow(2.7,2.2 * (Math.log(targetSpeed) - Math.log(6.06)));
+
 		double result = cx - tx;
-
-		System.out.println(result+"\t"+inputs.getDistanceToNextWaypoint());
-
 		return result;
 	}
 
