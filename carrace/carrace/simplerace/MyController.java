@@ -6,7 +6,7 @@ public class MyController implements Controller, Constants {
 
 	private SensorModel inputs;
 
-	private boolean backMode = false;//デフォルトはバック走行
+	private boolean backMode = true;//デフォルトはバック走行
 
 	private double reduceSpeedDistance = 0;
 	private boolean isMiss = false;
@@ -182,12 +182,14 @@ public class MyController implements Controller, Constants {
 		double cx = 0;
 		double tx = 0;
 		if(!backMode){
+			//フロントモード
 			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
 			tx = Math.pow(2.7, 2.2*(Math.log(targetSpeed) - Math.log(6.06)));
 		}else{
 			//計測しなおさないといけない
-			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
-			tx = Math.pow(2.7, 2.2*(Math.log(targetSpeed) - Math.log(6.06)));
+			//バックモード
+			cx = Math.pow(2.7,2.3*(Math.log(currentSpeed) - Math.log(4.4)));
+			tx = Math.pow(2.7, 2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
 		// cx /= Math.pow(3600,0.5);
 		// tx /= Math.pow(3600,0.5);

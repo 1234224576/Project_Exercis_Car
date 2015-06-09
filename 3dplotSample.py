@@ -44,15 +44,15 @@ def error(f,x,y):
 	return sp.sum((f(x)-y)**2)
 
 ###backMode####
-# dataFile = open('back.txt','r')
-# lines = dataFile.readlines()
-# count = 0
-# x_params = []
-# y_params = []
-# for line in lines:
-# 	x,y = line.split(" ")
-# 	x_params.append(-1* (float(x)- 200.0)/ pow(3600,0.5))
-# 	y_params.append(-1 * float(y))
+dataFile = open('back.txt','r')
+lines = dataFile.readlines()
+count = 0
+x_params = []
+y_params = []
+for line in lines:
+	x,y = line.split(" ")
+	x_params.append(-1* (float(x)- 200.0)/ pow(3600,0.5))
+	y_params.append(-1 * float(y))
 ###############
 
 ###frontMode####
@@ -68,15 +68,15 @@ def error(f,x,y):
 ###############
 
 # #########テスト#########
-dataFile = open('test.txt','r')
-lines = dataFile.readlines()
-count = 0
-x_params = []
-y_params = []
-for line in lines:
-	x,y = line.split("\t")
-	x_params.append(float(x))
-	y_params.append(float(y))
+# dataFile = open('test.txt','r')
+# lines = dataFile.readlines()
+# count = 0
+# x_params = []
+# y_params = []
+# for line in lines:
+# 	x,y = line.split("\t")
+# 	x_params.append(float(x))
+# 	y_params.append(float(y))
 #########
 
 
