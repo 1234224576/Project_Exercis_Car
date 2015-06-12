@@ -15,8 +15,6 @@ public class MyController implements Controller, Constants {
     public int control (SensorModel inputs) {
     	this.inputs = inputs;
 		int command = backward;
-		// System.out.println(inputs.getPosition().x + " " + inputs.getSpeed());
-
 		
 		command = defaultThink();
 		
@@ -79,8 +77,6 @@ public class MyController implements Controller, Constants {
 		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離	
 		double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
 
-		// System.out.println(Math.abs(inputs.getSpeed()));
-
 		if(Math.abs(inputs.getSpeed()) > 3.0) return result;
 		// if(distance > 0.5) return result;
 		if(angle >= 100 && angle <= 170.0 && !backMode){
@@ -97,10 +93,6 @@ public class MyController implements Controller, Constants {
 		旗を取り逃した時の処理（未完成）
 	***/
 	private int missCatchFlag(){
-		// System.out.println("距離:"+inputs.getDistanceToNextWaypoint());
-		// System.out.println("角度:"+Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())));
-
-
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
 			if(angle >=7.0 && angle <= 173.0){
@@ -109,13 +101,10 @@ public class MyController implements Controller, Constants {
 		}
 
 		if(isMiss && inputs.getDistanceToNextWaypoint() < 0.08){
-			// return (backMode) ? forward : backward;	
 			return goFowardNextFlagReverseDirection();
 		}else{
 			isMiss = false;
 		}
-
-
 
 		return -1;
 	}
@@ -161,9 +150,6 @@ public class MyController implements Controller, Constants {
 		if(angle2 >= 90) {
 			if(rightAngleDistance2 <= 50) idealSpeed = 3.0;
 			else if(rightAngleDistance2 <= 100) idealSpeed = 3.5;
-			// else if(rightAngleDistance2 <= 150) idealSpeed = ;
-			// else if(rightAngleDistance2 <= 200) idealSpeed = ;
-			// else if(rightAngleDistance2 <= 250) idealSpeed = ;
 			else if(rightAngleDistance2 <= 300) idealSpeed = 4.6;
 			else if(rightAngleDistance2 <= 350) idealSpeed = 4.8;
 			else if(rightAngleDistance2 <= 400) idealSpeed = 5.0;
@@ -172,27 +158,16 @@ public class MyController implements Controller, Constants {
 			else if(angle2 <= 20) angleScore = 4.8;
 			else if(angle2 <= 30) angleScore = 4.6;
 			else if(angle2 <= 40) angleScore = 4.4;
-			// else if(angle2 <= 50) angleScore = ;
-			// else if(angle2 <= 60) angleScore = ;
-			// else if(angle2 <= 70) angleScore = ;
-			// else if(angle2 <= 80) angleScore = ;
 			else if(angle2 < 90) angleScore = 3.0;
 
 			if(rightAngleDistance2 <= 50) distanceScore = 3.0;
 			else if(rightAngleDistance2 <= 100) distanceScore = 3.5;
-			// else if(rightAngleDistance2 <= 150) distanceScore = ;
-			// else if(rightAngleDistance2 <= 200) distanceScore = ;
-			// else if(rightAngleDistance2 <= 250) distanceScore = ;
 			else if(rightAngleDistance2 <= 300) distanceScore = 4.6;
 			else if(rightAngleDistance2 <= 350) distanceScore = 4.8;
 			else if(rightAngleDistance2 <= 400) distanceScore = 5.0;
 
 			idealSpeed = (angleScore + distanceScore) / 2;
 		}
-
-
-		// System.out.println("cos距離:"+rightAngleDistance2);
-		// System.out.println("距離:"+distance);
 		return idealSpeed;
 	}
 	/***
@@ -207,17 +182,11 @@ public class MyController implements Controller, Constants {
 			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
 			tx = Math.pow(2.7, 2.2*(Math.log(targetSpeed) - Math.log(6.06)));
 		}else{
-			//計測しなおさないといけない
 			//バックモード
 			cx = Math.pow(2.7,2.3*(Math.log(currentSpeed) - Math.log(4.4)));
 			tx = Math.pow(2.7, 2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
-		// cx /= Math.pow(3600,0.5);
-		// tx /= Math.pow(3600,0.5);
 		double result = cx - tx;
-
-		// System.out.println(result+"\t"+inputs.getDistanceToNextWaypoint());
-
 		return result;
 	}
 
