@@ -188,6 +188,12 @@ public class MyController implements Controller, Constants {
 			// else if(rightAngleDistance2 <= 150) distanceScore = ;
 			// else if(rightAngleDistance2 <= 200) distanceScore = ;
 			// else if(rightAngleDistance2 <= 250) distanceScore = ;
+			// else if(rightAngleDistance2 <= 150) distanceScore = ;
+			// else if(rightAngleDistance2 <= 200) distanceScore = ;
+			// else if(rightAngleDistance2 <= 250) distanceScore = ;
+			// else if(rightAngleDistance2 <= 150) distanceScore = ;
+			// else if(rightAngleDistance2 <= 200) distanceScore = ;
+			// else if(rightAngleDistance2 <= 250) distanceScore = ;
 			else if(rightAngleDistance2 <= 300) distanceScore = 4.6;
 			else if(rightAngleDistance2 <= 350) distanceScore = 4.8;
 			else if(rightAngleDistance2 <= 400) distanceScore = 5.0;
