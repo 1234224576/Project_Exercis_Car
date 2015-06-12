@@ -145,7 +145,7 @@ public class MyController implements Controller, Constants {
 
 	/***
 		次の旗を取得時の突入スピードを返す
-	***/
+	***///
 	private double calcSpeedWhenGetNextFlag(){
 		double idealSpeed = 0; //理想突入スピード
 
