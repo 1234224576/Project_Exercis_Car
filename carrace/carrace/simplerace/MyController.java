@@ -49,6 +49,11 @@ public class MyController implements Controller, Constants {
 		//旗取り逃し処理。バックする
 		int c = missCatchFlag();
 		if(c != -1) command = c;
+		
+		//旗を取る直前に次の旗へ向かってハンドルを切る
+		if(inputs.getDistanceToNextWaypoint() <= 0.08){
+			command = goFowardNextNextFlagDirection();
+		}
 
         return command;
     }
