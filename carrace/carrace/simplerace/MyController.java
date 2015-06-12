@@ -145,7 +145,7 @@ public class MyController implements Controller, Constants {
 
 	/***
 		次の旗を取得時の突入スピードを返す
-	***/
+	***///
 	private double calcSpeedWhenGetNextFlag(){
 		double idealSpeed = 0; //理想突入スピード
 
@@ -185,6 +185,12 @@ public class MyController implements Controller, Constants {
 
 			if(rightAngleDistance2 <= 50) distanceScore = 3.0;
 			else if(rightAngleDistance2 <= 100) distanceScore = 3.5;
+			// else if(rightAngleDistance2 <= 150) distanceScore = ;
+			// else if(rightAngleDistance2 <= 200) distanceScore = ;
+			// else if(rightAngleDistance2 <= 250) distanceScore = ;
+			// else if(rightAngleDistance2 <= 150) distanceScore = ;
+			// else if(rightAngleDistance2 <= 200) distanceScore = ;
+			// else if(rightAngleDistance2 <= 250) distanceScore = ;
 			// else if(rightAngleDistance2 <= 150) distanceScore = ;
 			// else if(rightAngleDistance2 <= 200) distanceScore = ;
 			// else if(rightAngleDistance2 <= 250) distanceScore = ;
