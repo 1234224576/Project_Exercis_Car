@@ -1,21 +1,19 @@
 package simplerace;
 
 public class MyController implements Controller, Constants {
-
-	public static final int CHANGE_COUNT = 5;
-
 	private SensorModel inputs;
 
-	private boolean backMode = true;//デフォルトはバック走行
-
+	private boolean backMode = false;//デフォルトは前向き走行
 	private double reduceSpeedDistance = 0;
 	private boolean isMiss = false;
+
     public void reset() {}
 
     public int control (SensorModel inputs) {
     	this.inputs = inputs;
-		int command = backward;
+		int command = forward;
 		
+		//特別な事象がない限りこのメソッドから帰ってくるコマンドが用いられる
 		command = defaultThink();
 		
 		//理想スピードを計算
@@ -23,9 +21,8 @@ public class MyController implements Controller, Constants {
 		//減速開始位置を算出
 		reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
 
-		
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
-			//リセット
+			//理想スピードをリセット
 			reduceSpeedDistance = 0;
 		}
 
@@ -38,7 +35,7 @@ public class MyController implements Controller, Constants {
 			}
 		}
 
-		//バックモード/フロントモードへの切り替えの決定
+		//バックモード/フロントモードへの切り替えの決定（未完成の為コメントアウト）
 		// backMode = decisionBackMode();
 
 
@@ -47,9 +44,9 @@ public class MyController implements Controller, Constants {
 		if(c != -1) command = c;
 
 		//旗を取る直前に次の旗へ向かってハンドルを切る
-		// if(inputs.getDistanceToNextWaypoint() <= 0.08){
-		// 	command = goFowardNextNextFlagDirection();
-		// }
+		if(inputs.getDistanceToNextWaypoint() <= 0.08 && inputs.getSpeed() > 0.05){
+			command = goFowardNextNextFlagDirection();
+		}
 
         return command;
     }
@@ -70,7 +67,7 @@ public class MyController implements Controller, Constants {
 	}
 
 	/***
-		バックモード/フロントモードの切り替えを判断する
+		バックモード/フロントモードの切り替えを判断する（未完成）
 	***/
 	private boolean decisionBackMode(){
 		boolean result = this.backMode;
@@ -168,7 +165,7 @@ public class MyController implements Controller, Constants {
 
 			idealSpeed = (angleScore + distanceScore) / 2;
 		}
-		return idealSpeed;
+		return idealSpeed=0;
 	}
 	/***
 		今のスピードから指定スピードに減速するにはどれくらいの距離を要するかを計算する
@@ -180,11 +177,11 @@ public class MyController implements Controller, Constants {
 		if(!backMode){
 			//フロントモード
 			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
-			tx = Math.pow(2.7, 2.2*(Math.log(targetSpeed) - Math.log(6.06)));
+			tx = Math.pow(2.7,2.2*(Math.log(targetSpeed) - Math.log(6.06)));
 		}else{
 			//バックモード
 			cx = Math.pow(2.7,2.3*(Math.log(currentSpeed) - Math.log(4.4)));
-			tx = Math.pow(2.7, 2.3*(Math.log(targetSpeed) - Math.log(4.4)));
+			tx = Math.pow(2.7,2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
 		double result = cx - tx;
 		return result;
