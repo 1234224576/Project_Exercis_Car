@@ -19,8 +19,9 @@ public class MyController implements Controller, Constants {
 		//理想スピードを計算
 		double idealSpeed = calcSpeedWhenGetNextFlag();
 		//減速開始位置を算出
-		double currentReduce = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
-		if(reduceSpeedDistance < currentReduce) reduceSpeedDistance = currentReduce;
+		// double currentReduce = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
+		// if(reduceSpeedDistance < currentReduce) reduceSpeedDistance = currentReduce;
+		reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
 		// reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			//理想スピードをリセット
@@ -29,9 +30,14 @@ public class MyController implements Controller, Constants {
 
 
 		//減速開始判定処理
-		if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
+		// if( Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
 			if(reduceSpeedDistance >= inputs.getDistanceToNextWaypoint()){
 				//ブレーキを踏む
+				System.out.println("break"+inputs.getSpeed());
+				System.out.println("distance"+inputs.getDistanceToNextWaypoint());
+				System.out.println("reduce"+reduceSpeedDistance);
+
+
 				if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
 					command = (backMode) ? forward : backward;
 				}else if(this.inputs.getAngleToNextWaypoint() >= 0){
@@ -40,24 +46,21 @@ public class MyController implements Controller, Constants {
 					command = (backMode) ? forwardright : backwardright;
 				}
 			}
-		}
+		// }
 
 		//バックモード/フロントモードへの切り替えの決定（未完成の為コメントアウト）
 		// backMode = decisionBackMode();
 
-
 		//旗取り逃し処理。バックする
 		int c = missCatchFlag();
 		if(c != -1) command = c;
-
+		if(inputs.getSpeed()<1.00) command = defaultThink();
 		//旗を取る直前に次の旗へ向かってハンドルを切る
-		// if(inputs.getDistanceToNextWaypoint() <= 0.08 && inputs.getSpeed() > 0.05){
-		// 	command = goFowardNextNextFlagDirection();
+		if(inputs.getDistanceToNextWaypoint() <= 0.07 && inputs.getSpeed() > 0.05){
+			command = goFowardNextNextFlagDirection();
 
-		// }
-		if(inputs.getSpeed() < 0.05){
-			command = defaultThink();
 		}
+		
         return command;
     }
 
@@ -100,18 +103,25 @@ public class MyController implements Controller, Constants {
 		旗を取り逃した時の処理（未完成）
 	***/
 	private int missCatchFlag(){
-		if(inputs.getDistanceToNextWaypoint() < 0.05){
-			double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
-			if(angle >=7.0 && angle <= 173.0){
-				isMiss = true;
-			}
-		}
+		// if(inputs.getDistanceToNextWaypoint() < 0.08){
+		// 	double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
 
-		if(isMiss && inputs.getDistanceToNextWaypoint() < 0.08){
-			return goFowardNextFlagReverseDirection();
-		}else{
-			isMiss = false;
-		}
+		// 	if(inputs.getSpeed()>=1.0 && angle >=5.0 && angle <= 175.0){
+		// 		isMiss = true;
+		// 	}
+		// 	else if(inputs.getSpeed()<1.0 && angle >=8.0 && angle <= 171.0){
+		// 		isMiss = true;
+		// 	}
+		// 	else if(inputs.getSpeed()<0.05 && angle >=10.0 && angle <= 170.0){
+		// 		isMiss = true;
+		// 	}
+		// }
+
+		// if(isMiss && inputs.getDistanceToNextWaypoint() < 0.007){
+		// 	return goFowardNextFlagReverseDirection();
+		// }else{
+		// 	isMiss = false;
+		// }
 
 		return -1;
 	}
@@ -192,12 +202,12 @@ public class MyController implements Controller, Constants {
 			tx = Math.pow(2.7,2.00*(Math.log(targetSpeed) - Math.log(19.0)));
 
 		}else{
-			//バックモード
+			//バックモードこれ再測定しないといけない
 			cx = Math.pow(2.7,2.3*(Math.log(currentSpeed) - Math.log(4.4)));
 			tx = Math.pow(2.7,2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
 		//0.1は補正値
-		double result = cx - tx + 0.1;
+		double result = cx - tx + (0.1 - tx*0.025);
 		return result;
 	}
 
