@@ -53,10 +53,10 @@ public class MyController implements Controller, Constants {
 
 		//旗取り逃し処理。バックする
 		int c = missCatchFlag();
-		if(c != -1) command = c;
-		if(inputs.getSpeed()<1.00) command = defaultThink();
+		// if(c != -1) command = c;
+		if(inputs.getSpeed()<0.8) command = defaultThink();
 		//旗を取る直前に次の旗へ向かってハンドルを切る
-		if(inputs.getDistanceToNextWaypoint() <= 0.07 && inputs.getSpeed() > 0.05){
+		if(inputs.getDistanceToNextWaypoint() <= 0.05 && inputs.getSpeed() > 0.05){
 			command = goFowardNextNextFlagDirection();
 
 		}
@@ -103,25 +103,25 @@ public class MyController implements Controller, Constants {
 		旗を取り逃した時の処理（未完成）
 	***/
 	private int missCatchFlag(){
-		// if(inputs.getDistanceToNextWaypoint() < 0.08){
-		// 	double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
+		if(inputs.getDistanceToNextWaypoint() < 0.08){
+			double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
 
-		// 	if(inputs.getSpeed()>=1.0 && angle >=5.0 && angle <= 175.0){
-		// 		isMiss = true;
-		// 	}
-		// 	else if(inputs.getSpeed()<1.0 && angle >=8.0 && angle <= 171.0){
-		// 		isMiss = true;
-		// 	}
-		// 	else if(inputs.getSpeed()<0.05 && angle >=10.0 && angle <= 170.0){
-		// 		isMiss = true;
-		// 	}
-		// }
+			if(inputs.getSpeed()>=1.0 && angle >=5.0 && angle <= 175.0){
+				isMiss = true;
+			}
+			else if(inputs.getSpeed()<1.0 && angle >=8.0 && angle <= 171.0){
+				isMiss = true;
+			}
+			else if(inputs.getSpeed()<0.05 && angle >=10.0 && angle <= 170.0){
+				isMiss = true;
+			}
+		}
 
-		// if(isMiss && inputs.getDistanceToNextWaypoint() < 0.007){
-		// 	return goFowardNextFlagReverseDirection();
-		// }else{
-		// 	isMiss = false;
-		// }
+		if(isMiss && inputs.getDistanceToNextWaypoint() < 0.007){
+			return goFowardNextFlagReverseDirection();
+		}else{
+			isMiss = false;
+		}
 
 		return -1;
 	}
@@ -149,43 +149,68 @@ public class MyController implements Controller, Constants {
 	***/
 	private double calcSpeedWhenGetNextFlag(){
 		double idealSpeed = 0; //理想突入スピード
-
 		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
-		double angle = getTwoPointDegreeTwo(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()) - getCarDegree(); //次の旗と次の次の旗との角度
+		double flag_angle = getTwoPointDegreeTwo(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次の次の旗との角度
+		double my_angle = getTwoPointDegreeTwo(inputs.getPosition(),inputs.getNextWaypointPosition());
 
-		double angle2 = Math.abs(angle);
-		if(angle2 > 180){
-			angle2 = 360 - angle2;
+		double gap = Math.abs(flag_angle - my_angle);
+		if(gap > 180) gap -= 360;
+		gap = Math.abs(gap);
+		
+		if(gap > 130){
+			//角度がかなり急（真反対）
+			if(distance > 250){
+				idealSpeed = 2.0;
+			}else if(distance > 200){
+				idealSpeed = 1.8;
+			}else if(distance > 150){
+				idealSpeed = 1.5;
+			}else if(distance > 100){
+				idealSpeed = 1.3;
+			}else if(distance > 50){
+				idealSpeed = 1.0;
+			}
+		}else if(gap > 80){
+			idealSpeed = 3.0;
+
+			//そこそこ急、直角より曲がる
+			if(distance > 250){
+				idealSpeed = 5;
+			}else if(distance > 200){
+				idealSpeed = 4;
+			}else if(distance > 150){
+				idealSpeed = 4;
+			}else if(distance > 100){
+				idealSpeed = 3;
+			}else if(distance > 50){
+				idealSpeed = 2.0;
+			}else if(distance > 30){
+				idealSpeed = 1.5;
+			}else{
+				idealSpeed = 1.0;
+			}
+
+		}else if (gap > 45){
+			if(distance > 250){
+				idealSpeed = 5.0;
+			}else if(distance > 200){
+				idealSpeed = 4.5;
+			}else if(distance > 150){
+				idealSpeed = 4.2;
+			}else if(distance > 100){
+				idealSpeed = 4.0;
+			}else if(distance > 50){
+				idealSpeed = 3.5;
+			}else if(distance > 30){
+				idealSpeed = 2.2;
+			}else{
+				idealSpeed = 2.0;
+			}
+		}else{
+			//全然まがらない
+			idealSpeed = 5.0;
 		}
-
-		//理想速度をそれっぽい計算で求める
-		double rightAngleDistance = distance / Math.cos(Math.toRadians(90-angle2));
-		double rightAngleDistance2 = Math.abs(rightAngleDistance);
-		double angleScore = 0;
-		double distanceScore = 0;
-
-		if(angle2 >= 90) {
-			if(rightAngleDistance2 <= 50) idealSpeed = 3.0;
-			else if(rightAngleDistance2 <= 100) idealSpeed = 3.5;
-			else if(rightAngleDistance2 <= 300) idealSpeed = 4.6;
-			else if(rightAngleDistance2 <= 350) idealSpeed = 4.8;
-			else if(rightAngleDistance2 <= 400) idealSpeed = 5.0;
-		} else {
-			if(angle2 <= 10) angleScore = 5.0;
-			else if(angle2 <= 20) angleScore = 4.8;
-			else if(angle2 <= 30) angleScore = 4.6;
-			else if(angle2 <= 40) angleScore = 4.4;
-			else if(angle2 < 90) angleScore = 3.0;
-
-			if(rightAngleDistance2 <= 50) distanceScore = 3.0;
-			else if(rightAngleDistance2 <= 100) distanceScore = 3.5;
-			else if(rightAngleDistance2 <= 300) distanceScore = 4.6;
-			else if(rightAngleDistance2 <= 350) distanceScore = 4.8;
-			else if(rightAngleDistance2 <= 400) distanceScore = 5.0;
-
-			idealSpeed = (angleScore + distanceScore) / 2;
-		}
-		return idealSpeed=1;
+		return idealSpeed=2.0;
 	}
 	/***
 		今のスピードから指定スピードに減速するにはどれくらいの距離を要するかを計算する
@@ -207,7 +232,9 @@ public class MyController implements Controller, Constants {
 			tx = Math.pow(2.7,2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
 		//0.1は補正値
-		double result = cx - tx + (0.1 - tx*0.025);
+		double correctionValue = (0.08 - tx*0.02);
+		if(correctionValue<=0) correctionValue = 0;
+		double result = cx - tx + correctionValue;
 		return result;
 	}
 
