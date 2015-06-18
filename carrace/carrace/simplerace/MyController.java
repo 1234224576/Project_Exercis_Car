@@ -19,8 +19,9 @@ public class MyController implements Controller, Constants {
 		//理想スピードを計算
 		double idealSpeed = calcSpeedWhenGetNextFlag();
 		//減速開始位置を算出
-		reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
-
+		double currentReduce = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
+		if(reduceSpeedDistance < currentReduce) reduceSpeedDistance = currentReduce;
+		// reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			//理想スピードをリセット
 			reduceSpeedDistance = 0;
@@ -31,7 +32,13 @@ public class MyController implements Controller, Constants {
 		if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
 			if(reduceSpeedDistance >= inputs.getDistanceToNextWaypoint()){
 				//ブレーキを踏む
-				command = (backMode) ? forward : backward;
+				if(Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) <= 5.0|| Math.abs(radian2Degree(inputs.getAngleToNextWaypoint())) >= 175.0){
+					command = (backMode) ? forward : backward;
+				}else if(this.inputs.getAngleToNextWaypoint() >= 0){
+					command = (backMode) ? forwardleft : backwardleft;
+				}else{
+					command = (backMode) ? forwardright : backwardright;
+				}
 			}
 		}
 
@@ -44,10 +51,13 @@ public class MyController implements Controller, Constants {
 		if(c != -1) command = c;
 
 		//旗を取る直前に次の旗へ向かってハンドルを切る
-		if(inputs.getDistanceToNextWaypoint() <= 0.08 && inputs.getSpeed() > 0.05){
-			command = goFowardNextNextFlagDirection();
-		}
+		// if(inputs.getDistanceToNextWaypoint() <= 0.08 && inputs.getSpeed() > 0.05){
+		// 	command = goFowardNextNextFlagDirection();
 
+		// }
+		if(inputs.getSpeed() < 0.05){
+			command = defaultThink();
+		}
         return command;
     }
 
@@ -165,7 +175,7 @@ public class MyController implements Controller, Constants {
 
 			idealSpeed = (angleScore + distanceScore) / 2;
 		}
-		return idealSpeed=0;
+		return idealSpeed=1;
 	}
 	/***
 		今のスピードから指定スピードに減速するにはどれくらいの距離を要するかを計算する
@@ -176,14 +186,18 @@ public class MyController implements Controller, Constants {
 		double tx = 0;
 		if(!backMode){
 			//フロントモード
-			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
-			tx = Math.pow(2.7,2.2*(Math.log(targetSpeed) - Math.log(6.06)));
+			// cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
+			// tx = Math.pow(2.7,2.2*(Math.log(targetSpeed) - Math.log(6.06)));
+			cx = Math.pow(2.7,2.00*(Math.log(currentSpeed) - Math.log(19.0)));
+			tx = Math.pow(2.7,2.00*(Math.log(targetSpeed) - Math.log(19.0)));
+
 		}else{
 			//バックモード
 			cx = Math.pow(2.7,2.3*(Math.log(currentSpeed) - Math.log(4.4)));
 			tx = Math.pow(2.7,2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
-		double result = cx - tx;
+		//0.1は補正値
+		double result = cx - tx + 0.1;
 		return result;
 	}
 
