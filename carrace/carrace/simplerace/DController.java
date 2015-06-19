@@ -1,9 +1,10 @@
 package simplerace;
 
+
 public class DController implements Controller, Constants {
 
-	long start = System.currentTimeMillis();
-	
+	// long start = System.currentTimeMillis();
+int i=0;
 	public static final int CHANGE_COUNT = 5;
 
 	private SensorModel inputs;
@@ -19,7 +20,7 @@ public class DController implements Controller, Constants {
     	this.inputs = inputs;
 		int command = forward;
 		
-			System.out.println("経過時間 " + (System.currentTimeMillis()-start));
+		// System.out.println("経過時間 " + (System.currentTimeMillis()-start));
 
 		command = defaultThink();
 		
@@ -54,6 +55,15 @@ public class DController implements Controller, Constants {
 		if(inputs.getDistanceToNextWaypoint() <= 0.08){
 			command = goFowardNextNextFlagDirection();
 		}
+
+		// int i=0;
+		// if(inputs.getDistanceToNextWaypoint() == 0){
+			i++;
+			System.out.println("iは" + i + "です");
+
+			if(i == 1000)
+				i=0;
+		// }	
 
         return command;
     }
