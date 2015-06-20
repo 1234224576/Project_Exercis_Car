@@ -6,10 +6,13 @@ public class MyController implements Controller, Constants {
 	private boolean backMode = false;//デフォルトは前向き走行
 	private double reduceSpeedDistance = 0;
 	private boolean isMiss = false;
-
+	private int timeCount=0; //1〜1000までの値を取る
     public void reset() {}
 
     public int control (SensorModel inputs) {
+		if(this.timeCount == 1000) this.timeCount=0;
+    	timeCount++;
+    	System.out.println(timeCount);
     	this.inputs = inputs;
 		int command = forward;
 		
