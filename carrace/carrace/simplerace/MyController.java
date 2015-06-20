@@ -166,7 +166,7 @@ public class MyController implements Controller, Constants {
 		// System.out.println("distance:" +distance/400);
 		// System.out.println("angle" +angle/180);
 
-		idealSpeed = 7.0 - (gap*6.0/150.0) + (distance*1.5/400) - (angle*2.0/180);
+		idealSpeed = 7.0 - (gap*5.0/150.0) + (distance*1.5/400) - (angle*2.0/180);
 
 		System.out.println(gap*6.0/150.0);
 		return idealSpeed;
@@ -180,10 +180,10 @@ public class MyController implements Controller, Constants {
 		double tx = 0;
 		if(!backMode){
 			//フロントモード
-			cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
-			tx = Math.pow(2.7,2.2*(Math.log(targetSpeed) - Math.log(6.06)));
-			// cx = Math.pow(2.7,2.00*(Math.log(currentSpeed) - Math.log(19.0)));
-			// tx = Math.pow(2.7,2.00*(Math.log(targetSpeed) - Math.log(19.0)));
+			// cx = Math.pow(2.7,2.2*(Math.log(currentSpeed) - Math.log(6.06)));
+			// tx = Math.pow(2.7,2.2*(Math.log(targetSpeed) - Math.log(6.06)));
+			cx = Math.pow(2.7,2.00*(Math.log(currentSpeed) - Math.log(19.0)));
+			tx = Math.pow(2.7,2.00*(Math.log(targetSpeed) - Math.log(19.0)));
 
 		}else{
 			//バックモードこれ再測定しないといけない
@@ -191,8 +191,9 @@ public class MyController implements Controller, Constants {
 			tx = Math.pow(2.7,2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
 		//0.1は補正値
-		double correctionValue = (0.15 - tx*0.025);
+		double correctionValue = (0.10 - tx*0.02);
 		if(correctionValue<=0) correctionValue = 0;
+		// double result = cx - tx + correctionValue;
 		double result = cx - tx + correctionValue;
 		return result;
 	}
