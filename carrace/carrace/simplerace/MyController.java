@@ -12,7 +12,7 @@ public class MyController implements Controller, Constants {
     public int control (SensorModel inputs) {
 		if(this.timeCount == 1000) this.timeCount=0;
     	timeCount++;
-    	System.out.println(timeCount);
+
     	this.inputs = inputs;
 		int command = forward;
 		
