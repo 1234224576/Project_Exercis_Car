@@ -4,7 +4,7 @@ package simplerace;
 public class DController implements Controller, Constants {
 
 	// long start = System.currentTimeMillis();
-int i=0;
+	int i=0;
 	public static final int CHANGE_COUNT = 5;
 
 	private SensorModel inputs;

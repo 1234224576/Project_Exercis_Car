@@ -7,6 +7,11 @@ public class MyController implements Controller, Constants {
 	private double reduceSpeedDistance = 0;
 	private boolean isMiss = false;
 	private int timeCount=0; //1〜1000までの値を取る
+
+	private double nextMaxSpeed = 10;//次の速度制限
+	private double currentMaxSpeed = 10; //速度制限
+	private double startAngle =0; //旗を取った時のアングル
+
     public void reset() {}
 
     public int control (SensorModel inputs) {
@@ -18,6 +23,11 @@ public class MyController implements Controller, Constants {
 		
 		//特別な事象がない限りこのメソッドから帰ってくるコマンドが用いられる
 		command = defaultThink();
+
+		//nextMaxSpeedを計算
+		if(nextMaxSpeed != calcNextMaxSpeed()){
+			nextMaxSpeed = calcNextMaxSpeed();
+		}
 		
 		//理想スピードを計算
 		double idealSpeed = calcSpeedWhenGetNextFlag();
@@ -29,7 +39,13 @@ public class MyController implements Controller, Constants {
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			//理想スピードをリセット
 			reduceSpeedDistance = 0;
+			//次の制限速度をセット
+			currentMaxSpeed = nextMaxSpeed;
+			//Angleを計算
+			startAngle = Math.abs(radian2Degree(inputs.getAngleToNextNextWaypoint()));
 		}
+		System.out.println(currentMaxSpeed);
+
 
 
 		//減速開始判定処理
@@ -55,11 +71,16 @@ public class MyController implements Controller, Constants {
 		//バックモード/フロントモードへの切り替えの決定（未完成の為コメントアウト）
 		// backMode = decisionBackMode();
 
+		//速度制限にひっかかっていないかを判定
+		if(inputs.getSpeed() >= currentMaxSpeed){
+			command = (backMode) ? forward : backward;
+		}
+
 		//旗取り逃し処理。バックする
 		if(inputs.getSpeed()<1.0) command = defaultThink();
 		int c = missCatchFlag();
 		if(c != -1) command = c;
-		//旗を取る直前に次の旗へ向かってハンドルを切る
+		// 旗を取る直前に次の旗へ向かってハンドルを切る
 		if(inputs.getDistanceToNextWaypoint() <= 0.05 && inputs.getSpeed() > 0.05){
 			command = goFowardNextNextFlagDirection();
 
@@ -107,11 +128,9 @@ public class MyController implements Controller, Constants {
 		旗を取り逃した時の処理（未完成）
 	***/
 	private int missCatchFlag(){
-		if(inputs.getDistanceToNextWaypoint() < 0.07){
+		if(inputs.getDistanceToNextWaypoint() < 0.1){
 			double angle = Math.abs(radian2Degree(inputs.getAngleToNextWaypoint()));
-			if(inputs.getSpeed()>=1.0 && angle >=10.0 && angle <= 164.0){
-				System.out.println("miss");
-				System.out.println("angle:"+angle);
+			if(inputs.getSpeed()>=1.0 && angle >=15.0 && angle <= 165.0){
 				isMiss = true;
 			}
 			// else if(inputs.getSpeed()<1.0 && angle >=8.0 && angle <= 171.0){
@@ -124,6 +143,7 @@ public class MyController implements Controller, Constants {
 
 		if(isMiss){
 			isMiss = false;
+			currentMaxSpeed = 20.0;
 			return goFowardNextFlagReverseDirection();
 		}
 
@@ -169,9 +189,7 @@ public class MyController implements Controller, Constants {
 		// System.out.println("distance:" +distance/400);
 		// System.out.println("angle" +angle/180);
 
-		idealSpeed = 7.0 - (gap*5.0/150.0) + (distance*1.5/400) - (angle*2.0/180);
-
-		System.out.println(gap*6.0/150.0);
+		idealSpeed = 7.5 - (gap*4.0/150.0) + (distance*1.5/400) - (angle*2.0/180);
 		return idealSpeed;
 	}
 	/***
@@ -201,11 +219,41 @@ public class MyController implements Controller, Constants {
 		return result;
 	}
 
+	/***
+		制限速度を決定する
+	***/
+	private double calcNextMaxSpeed(){
+		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
+		
+		//後日ここを修正する
+		System.out.println("distance"+distance);
+		double result = 10.0;
+		if(distance<100){
+			// result = 2.0;
+		}else if(distance < 150){
+			result = 4.5;
+		}else if(distance < 200){
+			result = 5.0;
+		}else{
+			result = 10.0;
+		}
+		if(startAngle > 90){
+			result *= 2.0;
+		}
+		return result;
+	}
+
 
     /***
 		コマンド取得系メソッド
     ***/
     private int goFowardNextFlagDirection(){
+    	if((int)(Math.random()*100.0) % 3 == 0){
+    		if(this.inputs.getAngleToNextWaypoint() >= 0) {
+				return  left;
+			}
+			return right;
+    	}
     	if(this.inputs.getAngleToNextWaypoint() >= 0) {
 			return  (backMode) ? backwardleft :forwardleft;
 		}
