@@ -4,7 +4,8 @@ package simplerace;
 public class DController implements Controller, Constants {
 
 	// long start = System.currentTimeMillis();
-int i=0;
+	int i=0;
+	
 	public static final int CHANGE_COUNT = 5;
 
 	private SensorModel inputs;
@@ -58,13 +59,17 @@ int i=0;
 
 		// int i=0;
 		// if(inputs.getDistanceToNextWaypoint() == 0){
-			i++;
+		i++;
 			System.out.println("iは" + i + "です");
 
-			if(i == 1000)
-				i=0;
+		if(i == 1000)
+			i=0;
 		// }	
 
+		// if(i >= 120){
+		// 	idealSpeed=15;
+		// }
+		//System.out.println(idealSpeed);
         return command;
     }
 
@@ -181,6 +186,9 @@ int i=0;
 			idealSpeed = 15.0;
 		}
 
+		if(i >= 850){
+			idealSpeed = 100000;
+		}
 		// System.out.println("距離:"+distance);
 		// System.out.println("角度:"+angle2);
 
