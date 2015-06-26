@@ -90,11 +90,7 @@ public class MyController implements Controller, Constants {
 			command = goFowardNextNextFlagDirection();
 		}
 
-		//旗取り逃し処理。バックする
-		if(inputs.getSpeed()<=2.0) command = defaultThink();
-		// int c = missCatchFlag();
-		// if(c != -1) command = c;
-		
+
         return command;
     }
 
@@ -133,6 +129,26 @@ public class MyController implements Controller, Constants {
 	
 		return result;
 	}
+
+	/***
+		２つの旗が近い時の処理
+	***/
+	private int nearTwoPointDistance(){
+		int result = backward;
+		Vector2d targetPoint = getTargetPoint(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition());
+		double radian = getTwoPointDegreeTwo(inputs.getPosition(), targetPoint);
+
+		System.out.println("角度 : "+targetPoint.x);
+
+		if (radian < 0) {
+			result = backwardright;
+		} else {
+			result = backwardleft;
+		}
+
+		return result;
+	}
+
 	/***
 		旗を取り逃した時の処理（未完成）
 	***/
@@ -177,6 +193,7 @@ public class MyController implements Controller, Constants {
 	private double calcSpeedWhenGetNextFlag(){
 		double idealSpeed = 0; //理想突入スピード
 		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
+
 		double flag_angle = getTwoPointDegreeTwo(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次の次の旗との角度
 		double my_angle = getTwoPointDegreeTwo(inputs.getPosition(),inputs.getNextWaypointPosition());
 
@@ -271,6 +288,7 @@ public class MyController implements Controller, Constants {
     	double distance = Math.sqrt((v2.x - v.x) * (v2.x - v.x) + (v2.y - v.y) * (v2.y - v.y));
     	return distance;
 	}
+
     private double getTwoPointDegree(Vector2d v1,Vector2d v2) {
 	    double radian = Math.atan2(v2.x - v1.x, v2.y - v1.y);
 	    double degree = radian2Degree(radian);
@@ -292,6 +310,48 @@ public class MyController implements Controller, Constants {
 	    double radian = Math.atan2(v2.y - v1.y, v2.x - v1.x);
 	    double degree = radian2Degree(radian);
 	    return degree;
+	}
+
+	protected Vector2d getTargetPoint(Vector2d v1, Vector2d v2) { // 直線上の座標を求める
+		double a, b;
+		double l = 20; 
+		Vector2d tp1 = new Vector2d();
+		Vector2d tp2 = new Vector2d();
+		Vector2d tp = new Vector2d();
+
+		a = (v2.y - v1.y) / (v2.x - v1.x);
+		b = v1.y - a * v1.x;
+
+		double ta = 1 + a*a;
+		double tb = 2*a*b - 2*v1.x + 2*a*v1.y; 
+		double tc = v1.x*v1.x + b*b + 2*b*v1.y + v1.y*v1.y - l*l;
+
+		tp1.x = (-tb + (Math.pow(tb*tb - 4*ta*tc,0.5))) / 2*ta;
+		
+		tp1.y = a*tp1.x + b;
+		tp2.x = (-tb - (Math.pow(tb*tb - 4*ta*tc,0.5))) / 2*ta;
+		tp2.y = a*tp2.x + b;
+
+		tp.x = tp1.x;
+		tp.y = tp1.y;
+		if(getTwoPointDistance(tp1, v1) <= getTwoPointDistance(tp2, v2)){
+			tp.x = tp2.x;
+			tp.y = tp2.y;
+		}
+
+		// System.out.println(ta);
+		// System.out.println(tb);
+		// System.out.println(tc);
+		System.out.println(a);
+		// System.out.println(b);
+		// System.out.println(tp1.x);
+		// System.out.println(tp1.y);
+		// System.out.println(tp2.x);
+		// System.out.println(tp2.y);
+		// System.out.println(tp.x);
+		// System.out.println(tp.y);
+
+    	return tp;
 	}
 
 }
