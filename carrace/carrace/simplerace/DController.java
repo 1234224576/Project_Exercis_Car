@@ -1,7 +1,10 @@
 package simplerace;
 
+
 public class DController implements Controller, Constants {
 
+	// long start = System.currentTimeMillis();
+	int i=0;
 	public static final int CHANGE_COUNT = 5;
 
 	private SensorModel inputs;
@@ -16,8 +19,9 @@ public class DController implements Controller, Constants {
     public int control (SensorModel inputs) {
     	this.inputs = inputs;
 		int command = forward;
-
 		
+		// System.out.println("経過時間 " + (System.currentTimeMillis()-start));
+
 		command = defaultThink();
 		
 		//理想スピードを計算
@@ -51,6 +55,15 @@ public class DController implements Controller, Constants {
 		if(inputs.getDistanceToNextWaypoint() <= 0.08){
 			command = goFowardNextNextFlagDirection();
 		}
+
+		// int i=0;
+		// if(inputs.getDistanceToNextWaypoint() == 0){
+			i++;
+			System.out.println("iは" + i + "です");
+
+			if(i == 1000)
+				i=0;
+		// }	
 
         return command;
     }
@@ -240,5 +253,6 @@ public class DController implements Controller, Constants {
 	    double degree = radian2Degree(radian);
 	    return degree;
 	}
+
 
 }

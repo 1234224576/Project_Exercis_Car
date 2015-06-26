@@ -44,27 +44,29 @@ def error(f,x,y):
 	return sp.sum((f(x)-y)**2)
 
 ###backMode####
-dataFile = open('back.txt','r')
-lines = dataFile.readlines()
-count = 0
-x_params = []
-y_params = []
-for line in lines:
-	x,y = line.split(" ")
-	x_params.append(-1* (float(x)- 200.0)/ pow(3600,0.5))
-	y_params.append(-1 * float(y))
-###############
-
-###frontMode####
-# dataFile = open('front.txt','r')
+# dataFile = open('back.txt','r')
 # lines = dataFile.readlines()
 # count = 0
 # x_params = []
 # y_params = []
 # for line in lines:
 # 	x,y = line.split(" ")
-# 	x_params.append((float(x)- 200.0) / pow(3600,0.5))
-# 	y_params.append(float(y))
+# 	x_params.append(-1* (float(x)- 200.0)/ pow(3600,0.5))
+# 	y_params.append(-1 * float(y))
+###############
+
+###frontMode####
+dataFile = open('front.txt','r')
+lines = dataFile.readlines()
+count = 0
+x_params = []
+y_params = []
+for line in lines:
+	x,y = line.split(" ")
+	x = ((float(x)- 200.0) / pow(320000,0.5))
+
+	x_params.append(x)
+	y_params.append(float(y))
 ###############
 
 # #########テスト#########
@@ -94,15 +96,15 @@ for line in lines:
 # 	a = float(y)
 # 	y_params2.append(a)
 
-# fp1 = sp.polyfit(x_params,y_params,100)
-# f1 = sp.poly1d(fp1)
+fp1 = sp.polyfit(x_params,y_params,2)
+f1 = sp.poly1d(fp1)
 
 # print error(f1,x_params,y_params)
 
 
 
 #Plot graph
-# fx = sp.linspace(0,5,100)
+# fx = sp.linspace(0.0,2.0)
 # plt.plot(fx,f1(fx),linewidth=4)
 plt.plot(x_params,y_params,linewidth=2)
 # plt.plot(y_params2,x_params2,linewidth=2)
