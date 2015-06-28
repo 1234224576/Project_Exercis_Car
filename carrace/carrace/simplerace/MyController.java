@@ -103,8 +103,11 @@ public class MyController implements Controller, Constants {
 			command = goFowardNextNextFlagDirection();
 		}
 
-
-        return command;
+		//旗取り逃し処理。バックする
+		if(inputs.getSpeed()<=2.0) command = defaultThink();
+		// int c = missCatchFlag();
+		// if(c != -1) command = c;
+		return command;
     }
 
     /***
@@ -243,6 +246,9 @@ public class MyController implements Controller, Constants {
 		gap = Math.abs(gap);
 		double angle = Math.abs(radian2Degree(getAngle()));
 		idealSpeed = 7.34 - (gap*4.0/150.0) + (distance*1.5/400) - (angle*2.0/180);
+
+		//時間が残りすくないときは突っ込ませる
+		if(this.timeCount >= 850) idealSpeed = 100000;
 		return idealSpeed;
 	}
 	/***
