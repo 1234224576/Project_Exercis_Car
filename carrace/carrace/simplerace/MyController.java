@@ -13,6 +13,7 @@ public class MyController implements Controller, Constants {
 	private double nextMaxSpeed = 10;//次の速度制限
 	private double currentMaxSpeed = -1; //速度制限
 	private double startAngle =0; //旗を取った時のアングル
+	private int flagGetTimeCount = 0; //旗を取った時のカウント
 
     public void reset() {}
 
@@ -51,11 +52,9 @@ public class MyController implements Controller, Constants {
 		if(reduceSpeedDistance < currentReduce) reduceSpeedDistance = currentReduce;
 		reduceSpeedDistance = calcReduceSpeedDistance(Math.abs(inputs.getSpeed()),idealSpeed);
 
-		System.out.println(currentMaxSpeed);
 		double enemyFlagDistance = this.getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getOtherVehiclePosition ()); //相手の車と次の旗との距離
 		enemyFlagDistance = enemyFlagDistance/Math.pow(360000,0.5); //正規化が必要
-
-		if(getDistance() < 0.05 || enemyFlagDistance < 0.05){
+		if(inputs.getDistanceToNextWaypoint() <= 0.04 || enemyFlagDistance <= 0.04){
 			//理想スピードをリセット
 			reduceSpeedDistance = 0;
 			//次の制限速度をセット
@@ -64,6 +63,8 @@ public class MyController implements Controller, Constants {
 			isNextNext = false;
 			//Angleを計算
 			startAngle = Math.abs(radian2Degree(getAngle()));
+			//旗をとったときのカウントをセット
+			flagGetTimeCount = timeCount;
 			
 		}
 
@@ -107,6 +108,18 @@ public class MyController implements Controller, Constants {
 		if(inputs.getSpeed()<=2.0) command = defaultThink();
 		// int c = missCatchFlag();
 		// if(c != -1) command = c;
+
+		//次の次の旗を狙っている状態（isNextNext=Trueのとき）で、旗の上に乗っている状態ならばそこで車をストップさせる
+		if(this.isNextNext && this.getDistance()<0.03){
+			if(inputs.getSpeed()>=0.1){
+				command = backward;
+			}
+			if(inputs.getSpeed()<0.1){
+				command = neutral;
+			}
+		}
+
+
 		return command;
     }
 
@@ -128,7 +141,24 @@ public class MyController implements Controller, Constants {
 		相手の旗との距離を調べてNextNextを狙いに行くかのフラグを決定する
 	***/
 	private boolean decisionNextNextFlag(){
-		return true;
+		Vector2d myPos = inputs.getPosition();
+		Vector2d enePos = inputs.getOtherVehiclePosition();
+		Vector2d nextFlagPos =inputs.getNextWaypointPosition();
+
+		double myDistance = getTwoPointDistance(myPos,nextFlagPos);
+		double eneDistance = getTwoPointDistance(enePos,nextFlagPos);
+
+		//120フレーム間異常遅れてる場合は回転し続けてると判断して次の旗に向かうようにする
+		System.out.println(timeCount - flagGetTimeCount);
+		if(timeCount - flagGetTimeCount >= 120){
+			return false;
+		}
+
+		if(myDistance - eneDistance > 0){
+			return true;
+		}else{
+			return false;
+		}
 	}
 	/***
 		次の旗もしくは次の次の旗との距離を返す
@@ -138,7 +168,6 @@ public class MyController implements Controller, Constants {
 			return inputs.getDistanceToNextNextWaypoint();
 		}else{
 			return inputs.getDistanceToNextWaypoint();
-
 		}
 	}
 	/***
@@ -151,7 +180,6 @@ public class MyController implements Controller, Constants {
 			return inputs.getAngleToNextWaypoint();
 		}
 	}
-
 
 	/***
 		バックモード/フロントモードの切り替えを判断する（未完成）
@@ -389,7 +417,7 @@ public class MyController implements Controller, Constants {
 		// System.out.println(ta);
 		// System.out.println(tb);
 		// System.out.println(tc);
-		System.out.println(a);
+		// System.out.println(a);
 		// System.out.println(b);
 		// System.out.println(tp1.x);
 		// System.out.println(tp1.y);
