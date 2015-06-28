@@ -90,8 +90,11 @@ public class MyController implements Controller, Constants {
 			command = goFowardNextNextFlagDirection();
 		}
 
-
-        return command;
+		//旗取り逃し処理。バックする
+		if(inputs.getSpeed()<=2.0) command = defaultThink();
+		// int c = missCatchFlag();
+		// if(c != -1) command = c;
+		return command;
     }
 
     /***
