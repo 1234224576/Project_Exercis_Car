@@ -28,7 +28,7 @@ public class MyController implements Controller, Constants {
 
     	this.inputs = inputs;
 		int command = forward;
-		
+
 		//相手との距離を測って次の次の旗を狙いにいくかを決定する
 		this.isNextNext = decisionNextNextFlag();
 
@@ -44,7 +44,7 @@ public class MyController implements Controller, Constants {
 		if(nextMaxSpeed != calcNextMaxSpeed(getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()))){
 			nextMaxSpeed = calcNextMaxSpeed(getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()));
 		}
-		
+
 		//理想スピードを計算
 		double idealSpeed = calcSpeedWhenGetNextFlag();
 		//減速開始位置を算出
@@ -65,7 +65,7 @@ public class MyController implements Controller, Constants {
 			startAngle = Math.abs(radian2Degree(getAngle()));
 			//旗をとったときのカウントをセット
 			flagGetTimeCount = timeCount;
-			
+
 		}
 
 		//減速開始判定処理
@@ -81,7 +81,7 @@ public class MyController implements Controller, Constants {
 				}
 			}
 		// }
-		
+
 
 		//バックモード/フロントモードへの切り替えの決定（未完成の為コメントアウト）
 		// backMode = decisionBackMode();
@@ -97,7 +97,7 @@ public class MyController implements Controller, Constants {
 			}
 		}
 
-		
+
 		// 旗を取る直前に次の旗へ向かってハンドルを切る
 		//&& inputs.getSpeed() > 0.05
 		if(inputs.getDistanceToNextWaypoint() <= 0.075&& inputs.getSpeed() > 0.05){
@@ -119,6 +119,12 @@ public class MyController implements Controller, Constants {
 			}
 		}
 
+		//時間が残りすくないときは突っ込ませる
+		if(this.timeCount >= 950){
+			this.isNextNext = false;
+			command = defaultThink();
+		}
+
 
 		return command;
     }
@@ -135,7 +141,7 @@ public class MyController implements Controller, Constants {
 		}else{
 			return goFowardNextFlagDirection();
 		}
-		
+
 	}
 	/***
 		相手の旗との距離を調べてNextNextを狙いに行くかのフラグを決定する
@@ -186,7 +192,7 @@ public class MyController implements Controller, Constants {
 	***/
 	private boolean decisionBackMode(){
 		boolean result = this.backMode;
-		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離	
+		double distance = getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()); //次の旗と次と次の旗との距離
 		double angle = Math.abs(radian2Degree(getAngle()));
 
 		if(Math.abs(inputs.getSpeed()) > 3.0) return result;
@@ -198,7 +204,7 @@ public class MyController implements Controller, Constants {
 		if(angle <= 50.0 && backMode){
 			return false;
 		}
-	
+
 		return result;
 	}
 
@@ -307,7 +313,7 @@ public class MyController implements Controller, Constants {
 		制限速度を決定する
 	***/
 	private double calcNextMaxSpeed(double distance){
-		
+
 		//後日ここを修正する
 		double result = 10.0;
 		if(distance<80){
@@ -320,7 +326,7 @@ public class MyController implements Controller, Constants {
 			result = 7.5;
 		}else{
 			result = 9.0;
-		}	
+		}
 		return result + Math.random();
 	}
 
@@ -389,7 +395,7 @@ public class MyController implements Controller, Constants {
 
 	protected Vector2d getTargetPoint(Vector2d v1, Vector2d v2) { // 直線上の座標を求める
 		double a, b;
-		double l = 20; 
+		double l = 20;
 		Vector2d tp1 = new Vector2d();
 		Vector2d tp2 = new Vector2d();
 		Vector2d tp = new Vector2d();
@@ -398,11 +404,11 @@ public class MyController implements Controller, Constants {
 		b = v1.y - a * v1.x;
 
 		double ta = 1 + a*a;
-		double tb = 2*a*b - 2*v1.x + 2*a*v1.y; 
+		double tb = 2*a*b - 2*v1.x + 2*a*v1.y;
 		double tc = v1.x*v1.x + b*b + 2*b*v1.y + v1.y*v1.y - l*l;
 
 		tp1.x = (-tb + (Math.pow(tb*tb - 4*ta*tc,0.5))) / 2*ta;
-		
+
 		tp1.y = a*tp1.x + b;
 		tp2.x = (-tb - (Math.pow(tb*tb - 4*ta*tc,0.5))) / 2*ta;
 		tp2.y = a*tp2.x + b;
