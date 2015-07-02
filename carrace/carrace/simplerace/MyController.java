@@ -119,7 +119,7 @@ public class MyController implements Controller, Constants {
 			２つの旗が近い時の処理
 		***/
 		Vector2d targetPoint = getTargetPoint(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition());
-		if(!isLine && getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()) < 100.0) {
+		if(!isLine && getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()) < 300.0) {
 			int nd = nearTwoPointDistance(targetPoint);
 			command = nd;
 			if(targetPoint.x - 100 < inputs.getPosition().x && targetPoint.x + 100 > inputs.getPosition().x) {
@@ -242,26 +242,45 @@ public class MyController implements Controller, Constants {
 		}
 
 		isSpeed = false;
+		double angleSize = 1.0;
+		double angleResult;
 
-		if(targetPoint.x - 400 < inputs.getPosition().x && targetPoint.x + 400 > inputs.getPosition().x) {
-			if(targetPoint.y - 400 < inputs.getPosition().y && targetPoint.y + 400 > inputs.getPosition().y) {
-				if(inputs.getSpeed() <= 4.0) isSpeed = true;
-			}
-		} else if(targetPoint.x - 300 < inputs.getPosition().x && targetPoint.x + 300 > inputs.getPosition().x) {
-			if(targetPoint.y - 300 < inputs.getPosition().y && targetPoint.y + 300 > inputs.getPosition().y) {
-				if(inputs.getSpeed() <= 2.0) isSpeed = true;
-			}
-		} else if(targetPoint.x - 200 < inputs.getPosition().x && targetPoint.x + 200 > inputs.getPosition().x) {
+		if(radian2Degree(inputs.getOrientation()) < 0) {
+			angleResult = -(180 + (radian2Degree(inputs.getOrientation())));
+		} else {
+			angleResult = -(180 - (radian2Degree(inputs.getOrientation())));
+		}
+
+		if(radian < 0){
+			if((-180-radian) +45 >= angleResult && (-180-radian) -45 <= angleResult) angleSize = 0.5;
+		} else if(radian >= 0){
+			if((180-radian) +45 >= angleResult && (180-radian) -45 <= angleResult) angleSize = 0.5;
+		}
+
+		if(targetPoint.x - 200 < inputs.getPosition().x && targetPoint.x + 200 > inputs.getPosition().x) {
 			if(targetPoint.y - 200 < inputs.getPosition().y && targetPoint.y + 200 > inputs.getPosition().y) {
-				if(inputs.getSpeed() <= 1.5) isSpeed = true;
+				if(inputs.getSpeed() <= (angleSize * 5.0)) isSpeed = true;
+				System.out.println(angleSize * 5.0);
 			}
 		} else if(targetPoint.x - 150 < inputs.getPosition().x && targetPoint.x + 150 > inputs.getPosition().x) {
 			if(targetPoint.y - 150 < inputs.getPosition().y && targetPoint.y + 150 > inputs.getPosition().y) {
-				if(inputs.getSpeed() <= 1.0) isSpeed = true;
+				if(inputs.getSpeed() <= (angleSize * 3.5)) isSpeed = true;
+				System.out.println(angleSize * 3.5);
+			}
+		} else if(targetPoint.x - 120 < inputs.getPosition().x && targetPoint.x + 120 > inputs.getPosition().x) {
+			if(targetPoint.y - 120 < inputs.getPosition().y && targetPoint.y + 120 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= (angleSize * 2.0)) isSpeed = true;
+				System.out.println(angleSize * 2.0);
+			}
+		} else if(targetPoint.x - 110 < inputs.getPosition().x && targetPoint.x + 110 > inputs.getPosition().x) {
+			if(targetPoint.y - 110 < inputs.getPosition().y && targetPoint.y + 110 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= (angleSize * 1.5)) isSpeed = true;
+				System.out.println(angleSize * 1.5);
 			}
 		} else if(targetPoint.x - 100 < inputs.getPosition().x && targetPoint.x + 100 > inputs.getPosition().x) {
 			if(targetPoint.y - 100 < inputs.getPosition().y && targetPoint.y + 100 > inputs.getPosition().y) {
-				if(inputs.getSpeed() <= 0.5) isSpeed = true;
+				if(inputs.getSpeed() <= (angleSize * 1.0)) isSpeed = true;
+				System.out.println(angleSize * 1.0);
 			}
 		}
 
