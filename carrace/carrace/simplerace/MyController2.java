@@ -149,7 +149,7 @@ public class MyController2 implements Controller, Constants {
 		double eneDistance = getTwoPointDistance(enePos,nextFlagPos);
 
 		//120フレーム間異常遅れてる場合は回転し続けてると判断して次の旗に向かうようにする
-		System.out.println(timeCount - flagGetTimeCount);
+		// System.out.println(timeCount - flagGetTimeCount);
 		if(timeCount - flagGetTimeCount >= 120){
 			return false;
 		}
