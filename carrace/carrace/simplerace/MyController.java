@@ -24,9 +24,9 @@ public class MyController implements Controller, Constants {
 			startAngle = 0;
 			this.timeCount=0;
 		}
-    timeCount++;
+	    timeCount++;
 
-    this.inputs = inputs;
+	    this.inputs = inputs;
 		int command = forward;
 
 		//相手との距離を測って次の次の旗を狙いにいくかを決定する
@@ -125,7 +125,7 @@ public class MyController implements Controller, Constants {
 		}
 
 		return command;
-    }
+	}
 
     /***
 		直進するか、次の旗の方向に向かってハンドルを切るかを決定する
