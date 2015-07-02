@@ -12,6 +12,9 @@ public class MyController implements Controller, Constants {
 	private double currentMaxSpeed = -1; //速度制限
 	private double startAngle =0; //旗を取った時のアングル
 
+	private boolean isLine = false;
+	private boolean isSpeed = false;
+
     public void reset() {}
 
     public int control (SensorModel inputs) {
@@ -49,6 +52,8 @@ public class MyController implements Controller, Constants {
 		if(inputs.getDistanceToNextWaypoint() < 0.05){
 			//理想スピードをリセット
 			reduceSpeedDistance = 0;
+			//２点を通る直線をリセット
+			isLine = false;
 			//次の制限速度をセット
 			currentMaxSpeed = nextMaxSpeed;
 			//Angleを計算
@@ -90,6 +95,22 @@ public class MyController implements Controller, Constants {
 			command = goFowardNextNextFlagDirection();
 		}
 
+		/***
+			２つの旗が近い時の処理
+		***/
+		Vector2d targetPoint = getTargetPoint(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition());
+		if(!isLine && getTwoPointDistance(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition()) < 100.0) {
+			System.out.println("in");
+			int nd = nearTwoPointDistance(targetPoint);
+			command = nd;
+			if(targetPoint.x - 100 < inputs.getPosition().x && targetPoint.x + 100 > inputs.getPosition().x) {
+				if(targetPoint.y - 100 < inputs.getPosition().y && targetPoint.y + 100 > inputs.getPosition().y) {
+					isLine = true;
+				}
+			}
+		}
+		System.out.println("out");
+		// System.out.println("角度 : "+radian2Degree(inputs.getOrientation()));
 
         return command;
     }
@@ -133,18 +154,73 @@ public class MyController implements Controller, Constants {
 	/***
 		２つの旗が近い時の処理
 	***/
-	private int nearTwoPointDistance(){
-		int result = backward;
-		Vector2d targetPoint = getTargetPoint(inputs.getNextWaypointPosition(),inputs.getNextNextWaypointPosition());
-		double radian = getTwoPointDegreeTwo(inputs.getPosition(), targetPoint);
+	private int nearTwoPointDistance(Vector2d targetPoint){
+		int result = forward;
+		double radian = getTwoPointDegreeThree(inputs.getPosition(), targetPoint);
 
-		System.out.println("角度 : "+targetPoint.x);
-
-		if (radian < 0) {
-			result = backwardright;
+		if(inputs.getPosition().y < targetPoint.y) {
+			radian = 180 + radian;
 		} else {
-			result = backwardleft;
+			radian = -(180 - radian);
 		}
+
+		isSpeed = false;
+
+		if(targetPoint.x - 400 < inputs.getPosition().x && targetPoint.x + 400 > inputs.getPosition().x) {
+			if(targetPoint.y - 400 < inputs.getPosition().y && targetPoint.y + 400 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= 4.0) isSpeed = true;
+			}
+		} else if(targetPoint.x - 300 < inputs.getPosition().x && targetPoint.x + 300 > inputs.getPosition().x) {
+			if(targetPoint.y - 300 < inputs.getPosition().y && targetPoint.y + 300 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= 2.0) isSpeed = true;
+			}
+		} else if(targetPoint.x - 200 < inputs.getPosition().x && targetPoint.x + 200 > inputs.getPosition().x) {
+			if(targetPoint.y - 200 < inputs.getPosition().y && targetPoint.y + 200 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= 1.5) isSpeed = true;
+			}
+		} else if(targetPoint.x - 150 < inputs.getPosition().x && targetPoint.x + 150 > inputs.getPosition().x) {
+			if(targetPoint.y - 150 < inputs.getPosition().y && targetPoint.y + 150 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= 1.0) isSpeed = true;
+			}
+		} else if(targetPoint.x - 100 < inputs.getPosition().x && targetPoint.x + 100 > inputs.getPosition().x) {
+			if(targetPoint.y - 100 < inputs.getPosition().y && targetPoint.y + 100 > inputs.getPosition().y) {
+				if(inputs.getSpeed() <= 0.5) isSpeed = true;
+			}
+		}
+		
+		if(inputs.getPosition().x > targetPoint.x && inputs.getPosition().y < targetPoint.y) {
+			System.out.println("ブロック１");
+			if (radian2Degree(inputs.getOrientation()) <= -(180-radian) || radian2Degree(inputs.getOrientation()) >= radian) {
+				result = (isSpeed) ? forwardleft : backwardleft;
+			} else {
+				result = (isSpeed) ? forwardright : backwardright;
+			}
+		} else if(inputs.getPosition().x < targetPoint.x && inputs.getPosition().y > targetPoint.y) {
+			System.out.println("ブロック2");
+			
+			if (radian2Degree(inputs.getOrientation()) <= radian || radian2Degree(inputs.getOrientation()) >= (180+radian)) {
+				result = (isSpeed) ? forwardright : backwardright;
+			} else {
+				result = (isSpeed) ? forwardleft : backwardleft;
+			}
+		} else if(inputs.getPosition().x > targetPoint.x && inputs.getPosition().y > targetPoint.y) {
+			System.out.println("ブロック3");
+			
+			if (radian2Degree(inputs.getOrientation()) >= (180+radian) || radian2Degree(inputs.getOrientation()) <= radian) {
+				result = (isSpeed) ? forwardright : backwardright;
+			} else {
+				result = (isSpeed) ? forwardleft : backwardleft;
+			}
+		} else if(inputs.getPosition().x < targetPoint.x && inputs.getPosition().y < targetPoint.y){
+			System.out.println("ブロック4");
+			
+			if (radian2Degree(inputs.getOrientation()) >= radian || radian2Degree(inputs.getOrientation()) <= -(180-radian)) {
+				result = (isSpeed) ? forwardleft : backwardleft;
+			} else {
+				result = (isSpeed) ? forwardright : backwardright;
+			}
+		}
+		System.out.println(inputs.getSpeed());
 
 		return result;
 	}
@@ -314,35 +390,44 @@ public class MyController implements Controller, Constants {
 
 	protected Vector2d getTargetPoint(Vector2d v1, Vector2d v2) { // 直線上の座標を求める
 		double a, b;
-		double l = 20; 
+		double l = 100; 
 		Vector2d tp1 = new Vector2d();
 		Vector2d tp2 = new Vector2d();
 		Vector2d tp = new Vector2d();
 
 		a = (v2.y - v1.y) / (v2.x - v1.x);
-		b = v1.y - a * v1.x;
+		b = v1.y - (a * v1.x);
 
-		double ta = 1 + a*a;
-		double tb = 2*a*b - 2*v1.x + 2*a*v1.y; 
-		double tc = v1.x*v1.x + b*b + 2*b*v1.y + v1.y*v1.y - l*l;
+		double ta = 1.0 + a*a;
+		double tb = (2.0*a*b) - (2.0*v1.x) - (2.0*a*v1.y); 
+		double tc = (v1.x*v1.x) + (b*b) - (2.0*b*v1.y) + ((v1.y*v1.y) - (l*l));
 
-		tp1.x = (-tb + (Math.pow(tb*tb - 4*ta*tc,0.5))) / 2*ta;
-		
+		tp1.x = (-tb + (Math.pow(tb*tb - (4.0*ta*tc),0.5))) / (2.0*ta);
 		tp1.y = a*tp1.x + b;
-		tp2.x = (-tb - (Math.pow(tb*tb - 4*ta*tc,0.5))) / 2*ta;
+		tp2.x = (-tb - (Math.pow(tb*tb - (4.0*ta*tc),0.5))) / (2.0*ta);
 		tp2.y = a*tp2.x + b;
 
 		tp.x = tp1.x;
 		tp.y = tp1.y;
-		if(getTwoPointDistance(tp1, v1) <= getTwoPointDistance(tp2, v2)){
+		if(getTwoPointDistance(tp1, v2) <= getTwoPointDistance(tp2, v2)){
 			tp.x = tp2.x;
 			tp.y = tp2.y;
 		}
 
+		// System.out.println("1x: "+tp1.x);
+		// System.out.println("1y: "+tp1.y);
+		// System.out.println("---------------------------------------");
+		// System.out.println("2x: "+tp2.x);
+		// System.out.println("2y: "+tp2.y);
+		// System.out.println("---------------------------------------");
+		// System.out.println(getTwoPointDistance(tp1,inputs.getNextWaypointPosition()));
+		// System.out.println(getTwoPointDistance(tp2,inputs.getNextWaypointPosition()));
+
 		// System.out.println(ta);
 		// System.out.println(tb);
 		// System.out.println(tc);
-		System.out.println(a);
+		// System.out.println(tb*tb - 4*ta*tc);
+		// System.out.println(a);
 		// System.out.println(b);
 		// System.out.println(tp1.x);
 		// System.out.println(tp1.y);
@@ -352,6 +437,25 @@ public class MyController implements Controller, Constants {
 		// System.out.println(tp.y);
 
     	return tp;
+	}
+
+	private double getTwoPointDegreeThree(Vector2d v1,Vector2d v2) {
+	    // double radian = Math.cos(getTwoPointDistance(v1, v2) / Math.abs(v1.x-v2.x));
+	    // double degree = radian2Degree(radian);
+
+	    double my_angle = getTwoPointDegreeTwo(v1,v2);
+		if(my_angle > 180) my_angle -= 360;
+		my_angle = Math.abs(my_angle);
+
+		my_angle = 180 - my_angle;
+
+		if(v1.y < v2.y){
+			my_angle = my_angle * (-1.0);
+		}
+
+		return my_angle;
+	    // if(v1.x > v2.x) degree = 180 - degree;
+	    // return Math.abs(degree);
 	}
 
 }
