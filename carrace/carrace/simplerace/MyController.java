@@ -8,6 +8,7 @@ public class MyController implements Controller, Constants {
 
 	private double reduceSpeedDistance = 0;
 	private boolean isMiss = false;
+	private boolean enemyIsMiss = false; //敵がハタをとれない状態
 	private int timeCount=0; //1〜1000までの値を取る
 
 	private double nextMaxSpeed = 10;//次の速度制限
@@ -30,7 +31,7 @@ public class MyController implements Controller, Constants {
 		int command = forward;
 
 		//相手との距離を測って次の次の旗を狙いにいくかを決定する
-		this.isNextNext = decisionNextNextFlag();
+		if(!enemyIsMiss) this.isNextNext = decisionNextNextFlag();
 
 		//特別な事象がない限りこのメソッドから帰ってくるコマンドが用いられる
 		command = defaultThink();
@@ -61,6 +62,7 @@ public class MyController implements Controller, Constants {
 			currentMaxSpeed = enemyFlagDistance <0.05 ? -1 :nextMaxSpeed ;
 			//次の次の旗を狙いに行くフラグをリセット
 			isNextNext = false;
+			enemyIsMiss = false;
 			//Angleを計算
 			startAngle = Math.abs(radian2Degree(getAngle()));
 			//旗をとったときのカウントをセット
@@ -154,6 +156,7 @@ public class MyController implements Controller, Constants {
 
 		//120フレーム間異常遅れてる場合は回転し続けてると判断して次の旗に向かうようにする
 		if(timeCount - flagGetTimeCount >= 120){
+			enemyIsMiss = true;
 			return false;
 		}
 
@@ -256,10 +259,10 @@ public class MyController implements Controller, Constants {
 		if(gap > 180) gap -= 360;
 		gap = Math.abs(gap);
 		double angle = Math.abs(radian2Degree(getAngle()));
-		idealSpeed = 7.34 - (gap*4.0/150.0) + (distance*1.5/400) - (angle*2.0/180);
+		idealSpeed = 9.50 - (gap*4.0/150.0) + (distance*1.3/400) - (angle*2.0/180);
 
 		//時間が残りすくないときは突っ込ませる
-		if(this.timeCount >= 850) idealSpeed = 100000;
+		if(this.timeCount >= 950) idealSpeed = 100000;
 		return idealSpeed;
 	}
 	/***
@@ -280,7 +283,7 @@ public class MyController implements Controller, Constants {
 			tx = Math.pow(2.7,2.3*(Math.log(targetSpeed) - Math.log(4.4)));
 		}
 		//0.1は補正値
-		double correctionValue = (0.10 - tx*0.02);
+		double correctionValue = (0.15 - tx*0.02);
 		if(correctionValue<=0) correctionValue = 0;
 		double result = cx - tx + correctionValue;
 		return result;
